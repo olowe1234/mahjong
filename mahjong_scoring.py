@@ -148,10 +148,10 @@ def end_round(round_num, players, round_scores, total_scores):
         else:
             total_scores.loc[this_round, player.name] = total_scores.loc[prev_round, player.name] + round_scores.loc[this_round, player.name]
 
-    return players, score_inputs, round_scores, total_scores
+    return players, score_inputs, round_scores, total_scores, round_num
 
 
-def plotting(score_inputs, round_scores, total_scores):
+def plotting(score_inputs, round_scores, total_scores, round_num):
 
     input_text = []
     round_text = []
@@ -167,15 +167,19 @@ def plotting(score_inputs, round_scores, total_scores):
 
     ax1.axis('off')
 
-    input_table = plt.table(cellText=input_text,
-                            colLabels=score_inputs.columns,
-                            rowLabels=score_inputs.index,
-                            cellLoc='center',
-                            bbox=[0.06, 0, 1, 1],
-                            colColours=['deepskyblue']*10,
-                            rowColours=['deepskyblue']*10,
-                            cellColours=[['lightblue']*4, ['lightblue']*4, ['lightblue']*4])
+    input_table = plt.table(
+                    cellText=input_text,
+                    colLabels=score_inputs.columns,
+                    rowLabels=score_inputs.index,
+                    cellLoc='center',
+                    bbox=[0.06, 0, 1, 1],
+                    colColours=['deepskyblue']*10,
+                    rowColours=['deepskyblue']*10,
+                    cellColours=[['lightblue']*4]*round_num
+    )
+
     input_table.scale(1, 3)
+
     for (row, col), cell in input_table.get_celld().items():
         if row == 0 or col == -1:
             cell.set_text_props(fontproperties=FontProperties(weight='bold'))
@@ -184,6 +188,6 @@ def plotting(score_inputs, round_scores, total_scores):
 
 
 players, score_inputs, round_scores, total_scores = game_start(players)
-for round in range(1, 4):
-    players, score_inputs, round_scores, total_scores = end_round(round, players, round_scores, total_scores)
-plotting(score_inputs, round_scores, total_scores)
+for round in range(1, 8):
+    players, score_inputs, round_scores, total_scores, round_num = end_round(round, players, round_scores, total_scores)
+plotting(score_inputs, round_scores, total_scores, round_num)
