@@ -47,10 +47,11 @@ def game_start(players):
     # create list of winds (players)
     winds = ['East', 'South', 'West', 'North']
 
+    default_names = ['Darren', 'Karen', 'Ollie', 'Tilly']
     # initialise player names
     for i in range(len(winds)):
         # players[i].name = input(f'{winds[i]} wind player name: ')
-        players[i].name = f'p{i+1}'
+        players[i].name = f'{default_names[i]}'
 
         # initialise east wind player
         if winds[i] == 'East':
@@ -89,7 +90,7 @@ def end_round(round_num, players, round_scores, total_scores):
 
     # get new mahjong player
     # mahjong = input('Mahjong player: ')
-    mahjong = 'p2'
+    mahjong = 'Karen'
 
     for player in players:
         if mahjong == player.name:
@@ -151,8 +152,18 @@ def end_round(round_num, players, round_scores, total_scores):
     return players, score_inputs, round_scores, total_scores, round_num
 
 
-def plotting(score_inputs, round_scores, total_scores, round_num):
+def plotting(round_num, score_inputs, round_scores, total_scores):
 
+    """Plots tables and graphs of scores
+    Inputs:
+        round_num - round number
+        score_inputs - DataFrame of raw scores for each round
+        round_scores - DataFrame of scores for each round for each player
+        total_scores - DataFrame of cumulative scores over rounds
+    No Outputs
+    """
+
+    # turn dataframes into table formats
     input_text = []
     round_text = []
     total_text = []
@@ -162,32 +173,77 @@ def plotting(score_inputs, round_scores, total_scores, round_num):
         round_text.append(round_scores.iloc[row])
         total_text.append(total_scores.iloc[row])
 
-    fig_input = plt.figure(figsize=(11, 4), facecolor='aliceblue')
-    ax1 = fig_input.add_subplot(111)
+    fig = plt.figure(figsize=(12, 5), facecolor='whitesmoke')
+    ax1 = fig.add_subplot(311)
+    ax2 = fig.add_subplot(312)
+    ax3 = fig.add_subplot(313)
 
     ax1.axis('off')
+    ax2.axis('off')
+    ax3.axis('off')
 
-    input_table = plt.table(
+    ax1.set_title('Inputted Scores \n', fontweight='bold')
+    ax2.set_title('Round Scores \n', fontweight='bold')
+    ax3.set_title('Total Scores \n', fontweight='bold')
+
+    # input scores
+    input_table = ax1.table(
                     cellText=input_text,
                     colLabels=score_inputs.columns,
                     rowLabels=score_inputs.index,
                     cellLoc='center',
-                    bbox=[0.06, 0, 1, 1],
-                    colColours=['deepskyblue']*10,
+                    loc='center',
+                    colColours=['deepskyblue']*4,
                     rowColours=['deepskyblue']*10,
                     cellColours=[['lightblue']*4]*round_num
     )
 
-    input_table.scale(1, 3)
-
     for (row, col), cell in input_table.get_celld().items():
         if row == 0 or col == -1:
             cell.set_text_props(fontproperties=FontProperties(weight='bold'))
-    ax1.set_title('Inputted Scores', fontweight='bold', fontsize=24)
-    input_table.set_fontsize(20)
+
+    input_table.set_fontsize(12)
+
+    # round scores
+    round_table = ax2.table(
+                    cellText=round_text,
+                    colLabels=round_scores.columns,
+                    rowLabels=round_scores.index,
+                    cellLoc='center',
+                    loc='center',
+                    colColours=['orange']*4,
+                    rowColours=['orange']*10,
+                    cellColours=[['moccasin']*4]*round_num
+    )
+
+    for (row, col), cell in round_table.get_celld().items():
+        if row == 0 or col == -1:
+            cell.set_text_props(fontproperties=FontProperties(weight='bold'))
+
+    round_table.set_fontsize(12)
+    
+    # total scores
+    total_table = ax3.table(
+                    cellText=total_text,
+                    colLabels=total_scores.columns,
+                    rowLabels=total_scores.index,
+                    cellLoc='center',
+                    loc='center',
+                    colColours=['green']*4,
+                    rowColours=['green']*10,
+                    cellColours=[['palegreen']*4]*round_num
+    )
+
+    for (row, col), cell in total_table.get_celld().items():
+        if row == 0 or col == -1:
+            cell.set_text_props(fontproperties=FontProperties(weight='bold'))
+
+    total_table.set_fontsize(12)
+
+    fig.tight_layout(pad=1)
 
 
 players, score_inputs, round_scores, total_scores = game_start(players)
-for round in range(1, 8):
+for round in range(1, 4):
     players, score_inputs, round_scores, total_scores, round_num = end_round(round, players, round_scores, total_scores)
-plotting(score_inputs, round_scores, total_scores, round_num)
+plotting(round_num, score_inputs, round_scores, total_scores)
