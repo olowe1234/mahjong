@@ -11,12 +11,13 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import numpy as np
 
+
 # create class of players
 class player():
     def __init__(self):
         self.name = 'dave'
-        self.east_wind = 0
-        self.mahjong = 0
+        self.wind = 'east'
+        self.mahjong = False
         self.score = 0
 
 
@@ -45,17 +46,15 @@ def game_start(players):
     print('Let\'s play Mahjong!')
 
     # create list of winds (players)
-    winds = ['East', 'South', 'West', 'North']
+    winds = ['east', 'south', 'west', 'north']
 
     default_names = ['Darren', 'Karen', 'Ollie', 'Tilly']
+
     # initialise player names
     for i in range(len(winds)):
         # players[i].name = input(f'{winds[i]} wind player name: ')
         players[i].name = f'{default_names[i]}'
-
-        # initialise east wind player
-        if winds[i] == 'East':
-            players[i].east_wind = 1
+        players[i].wind = winds[i]
 
     # initialise scoreboards
     score_inputs = pd.DataFrame(columns=[players[i].name for i in range(4)])
@@ -92,19 +91,20 @@ def end_round(round_num, players, round_scores, total_scores):
     # mahjong = input('Mahjong player: ')
     mahjong = 'Karen'
 
+    # adjust mahjong attribute for each player
     for player in players:
         if mahjong == player.name:
-            player.mahjong = 1
+            player.mahjong = True
         else:
-            player.mahjong = 0
+            player.mahjong = False
 
     # initialise winning and losing players list for this round
     winner = []
     losers = []
 
-    # initialise DataFrame row and take score inputs
     for player in players:
 
+        # initialise DataFrame row and take score inputs
         round_scores.loc[this_round, player.name] = 0
         total_scores.loc[this_round, player.name] = 0
 
@@ -112,35 +112,45 @@ def end_round(round_num, players, round_scores, total_scores):
         player.score = np.random.randint(0, 56)
         score_inputs.loc[this_round, player.name] = player.score
 
-        if player.mahjong == 1:
+        if player.mahjong:
+
+            # save score of mahjong player
             mahjong_score = player.score
+
+            # add mahjong player to winners list
             winner.append(player)
 
-            if player.east_wind == 1:
-                multiplier = 2
-            else:
-                multiplier = 1
-
         else:
+            # add losing players to losers list
             losers.append(player)
 
     # for mahjong player
     for player in winner:
-        if player.east_wind == 1:
+
+        if player.wind == 'east':
+            east_win = True
             round_scores.loc[this_round, player.name] += 6 * mahjong_score
         else:
-            round_scores.loc[this_round, player.name] += 3 * mahjong_score
+            east_win = False
+            round_scores.loc[this_round, player.name] += 4 * mahjong_score
 
     # for losing players
     for player in losers:
-        round_scores.loc[this_round, player.name] -= multiplier * mahjong_score
+        # subtract mahjong score, doubled if east was mahjong
+        if east_win or player.wind == 'east':
+            round_scores.loc[this_round, player.name] -= 2 * mahjong_score
+        else:
+            round_scores.loc[this_round, player.name] -= mahjong_score
+
         for other in losers:
-            if player.east_wind == 1:
-                diff = 2 * (player.score - other.score)
-                round_scores.loc[this_round, player.name] += diff
-            else:
-                diff = player.score - other.score
-                round_scores.loc[this_round, player.name] += diff
+            # don't want player compared to themselves
+            if other != player:
+                if player.wind == 'east' or other.wind == 'east':
+                    diff = 2 * (player.score - other.score)
+                    round_scores.loc[this_round, player.name] += diff
+                else:
+                    diff = player.score - other.score
+                    round_scores.loc[this_round, player.name] += diff
 
     # update totals
     for player in players:
@@ -148,6 +158,19 @@ def end_round(round_num, players, round_scores, total_scores):
             total_scores.loc[this_round, player.name] = round_scores.loc[this_round, player.name]
         else:
             total_scores.loc[this_round, player.name] = total_scores.loc[prev_round, player.name] + round_scores.loc[this_round, player.name]
+
+    # create list of winds (players)
+    winds = ['east', 'south', 'west', 'north']
+
+    # changing winds
+    for player in players:
+        # if east goes mahjong they remain east
+        if player.mahjong and player.wind == 'east':
+            pass
+
+        else:
+            idx = winds.index(player.wind)
+            player.wind = winds[idx - 3]
 
     return players, score_inputs, round_scores, total_scores, round_num
 
