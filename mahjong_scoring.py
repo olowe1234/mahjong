@@ -46,15 +46,29 @@ def game_start(players):
     print('Let\'s play Mahjong!')
 
     # create list of winds (players)
-    winds = ['east', 'south', 'west', 'north']
+    winds = ['East', 'South', 'West', 'North']
 
     default_names = ['Darren', 'Karen', 'Ollie', 'Tilly']
 
     # initialise player names
-    for i in range(len(winds)):
-        # players[i].name = input(f'{winds[i]} wind player name: ')
-        players[i].name = f'{default_names[i]}'
-        players[i].wind = winds[i]
+    all_good = 0
+    while all_good == 0:
+        for i in range(len(winds)):
+            # players[i].name = f'{default_names[i]}'
+            count = 0
+            while count == 0:
+                name = input(f'{winds[i]} wind player name: ')
+                if type(name) == str:
+                    players[i].name = name
+                    players[i].wind = winds[i]
+                    proceed = input(f'{winds[i]} wind is {players[i].name}, yes? (y/n)')
+                    if proceed == 'y':
+                        count = 1
+        names = [f'{players[j].name}' for j in range(4)]
+        all_names = input(f'{names[0]}, {names[1]}, {names[2]} and {names[3]}, yes? (y/n)')
+        if all_names == 'y':
+            all_good = 1
+
 
     # initialise scoreboards
     score_inputs = pd.DataFrame(columns=[players[i].name for i in range(4)])
@@ -62,7 +76,13 @@ def game_start(players):
     total_scores = pd.DataFrame(columns=[players[i].name for i in range(4)])
 
     # let user decide when to move on
-    input('Setup complete, press enter to go to round 1 scoring.')
+    count = 0
+    while count == 0:
+        proceed = input('Setup complete, press enter to go to round 1 scoring.')
+        if proceed == '':
+            count = 1
+        else:
+            pass
 
     return players, score_inputs, round_scores, total_scores
 
@@ -88,9 +108,9 @@ def end_round(round_num, players, round_scores, total_scores):
     prev_round = f'Round {round_num - 1}'
 
     # get new mahjong player
-    # mahjong = input('Mahjong player: ')
-    mahjong = 'Karen'
+    mahjong = input('Mahjong player: ')
 
+    # mahjong = 'Karen'
     # adjust mahjong attribute for each player
     for player in players:
         if mahjong == player.name:
@@ -127,7 +147,7 @@ def end_round(round_num, players, round_scores, total_scores):
     # for mahjong player
     for player in winner:
 
-        if player.wind == 'east':
+        if player.wind == 'East':
             east_win = True
             round_scores.loc[this_round, player.name] += 6 * mahjong_score
         else:
@@ -137,7 +157,7 @@ def end_round(round_num, players, round_scores, total_scores):
     # for losing players
     for player in losers:
         # subtract mahjong score, doubled if east was mahjong
-        if east_win or player.wind == 'east':
+        if east_win or player.wind == 'East':
             round_scores.loc[this_round, player.name] -= 2 * mahjong_score
         else:
             round_scores.loc[this_round, player.name] -= mahjong_score
@@ -145,7 +165,7 @@ def end_round(round_num, players, round_scores, total_scores):
         for other in losers:
             # don't want player compared to themselves
             if other != player:
-                if player.wind == 'east' or other.wind == 'east':
+                if player.wind == 'East' or other.wind == 'East':
                     diff = 2 * (player.score - other.score)
                     round_scores.loc[this_round, player.name] += diff
                 else:
@@ -160,12 +180,12 @@ def end_round(round_num, players, round_scores, total_scores):
             total_scores.loc[this_round, player.name] = total_scores.loc[prev_round, player.name] + round_scores.loc[this_round, player.name]
 
     # create list of winds (players)
-    winds = ['east', 'south', 'west', 'north']
+    winds = ['East', 'South', 'West', 'North']
 
     # changing winds
     for player in players:
         # if east goes mahjong they remain east
-        if player.mahjong and player.wind == 'east':
+        if player.mahjong and player.wind == 'East':
             pass
 
         else:
