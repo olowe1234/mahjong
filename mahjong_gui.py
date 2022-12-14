@@ -92,9 +92,10 @@ class MainWindow(QMainWindow):
         self.name4Input.resize(name_in_width, name_in_height)
 
         # add confirm button to names
+        button_width = 75
         self.name_button = QPushButton('Confirm', self)
         self.name_button.move(name_in_x, name_in_y + 4 * (name_in_height + buffer))
-        self.name_button.resize(100, name_in_height)
+        self.name_button.resize(button_width, name_in_height)
         self.name_button.clicked.connect(self.update_names)
 
         # set round input distances
@@ -114,6 +115,7 @@ class MainWindow(QMainWindow):
         self.windTitle.move(round_x, name_y - 4 * buffer)
         self.windTitle.resize(name_in_width, name_in_height)
         self.windTitle.setFont(QFont("Times", weight=QFont.Bold))
+
         self.mjTitle = QLabel(self)
         self.mjTitle.setText('Mahjong')
         self.mjTitle.move(round_x + 8 * buffer, name_y - 4 * buffer)
@@ -158,8 +160,44 @@ class MainWindow(QMainWindow):
         # add confirm button to winds
         self.wind_button = QPushButton('Confirm', self)
         self.wind_button.move(round_x, name_y + 4 * (name_in_height + buffer))
-        self.wind_button.resize(100, name_in_height)
+        self.wind_button.resize(button_width, name_in_height)
         self.wind_button.clicked.connect(self.update_winds)
+
+        # add mahjong check boxes
+        tickx = round_x + 10 * buffer
+        ticky = name_y + 5
+
+        self.mj_tick1 = QCheckBox(self)
+        self.mj_tick1.move(tickx, ticky)
+        self.mj_tick1 = self.set_tick_style(self.mj_tick1)
+
+        self.mj_tick2 = QCheckBox(self)
+        self.mj_tick2.move(tickx, ticky + name_in_height + buffer)
+        self.mj_tick2 = self.set_tick_style(self.mj_tick2)
+
+        self.mj_tick3 = QCheckBox(self)
+        self.mj_tick3.move(tickx, ticky + 2 * (name_in_height + buffer))
+        self.mj_tick3 = self.set_tick_style(self.mj_tick3)
+
+        self.mj_tick4 = QCheckBox(self)
+        self.mj_tick4.move(tickx, ticky + 3 * (name_in_height + buffer))
+        self.mj_tick4 = self.set_tick_style(self.mj_tick4)
+
+        self.mj_list = [self.mj_tick1, self.mj_tick2, self.mj_tick3, self.mj_tick4]
+
+        ### ADD FUNCTION USING LAMBDAS TO STOP MORE THAN ONE MAHJONG BOX BEING TICKED ###
+
+
+    def set_tick_style(self, checkbox):
+        """
+        Change styling of tick boxes
+        """
+        checkbox.setStyleSheet("QCheckBox::indicator"
+                               "{"
+                               "width :30;"
+                               "height : 30;"
+                               "}")
+        return checkbox
 
 
     def auto_wind(self, wind_num):
