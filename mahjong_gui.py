@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
 
         # set name and size of window
         self.setWindowTitle("Mahjong Scorer")
-        self.setMinimumSize(QSize(700, 450))
+        self.setMinimumSize(QSize(650, 400))
 
         # set round number
         self.round_num = 1
@@ -99,13 +99,6 @@ class MainWindow(QMainWindow):
 
         self.name_list = [self.name1Input, self.name2Input, self.name3Input, self.name4Input]
 
-        # add confirm button to names
-        button_width = 75
-        self.name_button = QPushButton('Confirm Names', self)
-        self.name_button.move(name_in_x, name_in_y + 4 * (name_in_height + buffer))
-        self.name_button.resize(2 * button_width, name_in_height)
-        self.name_button.clicked.connect(self.update_names)
-
         # set round input distances
         round_x = name_width + name_in_width + 4 * buffer
         round_y = 2 * buffer
@@ -167,12 +160,6 @@ class MainWindow(QMainWindow):
 
         self.wind_list = [self.wind1List, self.wind2List, self.wind3List, self.wind4List]
 
-        # add confirm button to winds
-        self.wind_button = QPushButton('Confirm\nWinds', self)
-        self.wind_button.move(round_x, name_y + 4 * (name_in_height + buffer))
-        self.wind_button.resize(button_width, 2 * name_in_height)
-        self.wind_button.clicked.connect(self.update_winds)
-
         # add mahjong check boxes
         tickx = round_x + 11 * buffer
         ticky = name_y + 5
@@ -204,12 +191,6 @@ class MainWindow(QMainWindow):
         self.mj_tick2.clicked.connect(mahjong2)
         self.mj_tick3.clicked.connect(mahjong3)
         self.mj_tick4.clicked.connect(mahjong4)
-
-        # add confirm button to mahjong
-        self.mj_button = QPushButton('Confirm\nMahjong', self)
-        self.mj_button.move(tickx - 2 * buffer, name_y + 4 * (name_in_height + buffer))
-        self.mj_button.resize(button_width, 2 * name_in_height)
-        self.mj_button.clicked.connect(self.update_mahjong)
 
         # score box positions
         score_x = tickx + name_width
@@ -250,39 +231,40 @@ class MainWindow(QMainWindow):
         self.score4.resize(name_width, name_height)
 
         self.scores_list = [self.score1, self.score2, self.score3, self.score4]
-
-        # add confirm button to scores
-        self.scores_button = QPushButton('Confirm\nScores', self)
-        self.scores_button.move(score_x, name_y + 4 * (name_in_height + buffer))
-        self.scores_button.resize(button_width, 2 * name_in_height)
-        self.scores_button.clicked.connect(self.update_scores)
         
         # add a confirm button for all things this round
+        button_width = name_width
         self.round_button = QPushButton('Confirm\nRound', self)
-        self.round_button.move(tickx + 5 * buffer + 2 * button_width, name_y)
+        self.round_button.move(tickx + 2 * buffer + 2 * button_width, name_y)
         self.round_button.resize(button_width, 2 * name_in_height)
         self.round_button.clicked.connect(self.update_all)
-        
+        self.round_button.setStyleSheet("background-color: mediumorchid")
+        self.round_button.setFont(QFont("Times", weight=QFont.Bold))
+
         # add a previous round button to go to previous round
         self.previous_button = QPushButton('Previous Round', self)
-        self.previous_button.move(tickx + buffer + 2 * button_width, name_y + 2 * (name_in_height + buffer))
+        self.previous_button.move(name_in_x + 4 * buffer, name_y + buffer + 4 * (name_in_height + buffer))
         self.previous_button.resize(2 * button_width, name_in_height)
-        self.previous_button.setStyleSheet("background-color: pink")
+        self.previous_button.setStyleSheet("background-color: lightblue")
         self.previous_button.clicked.connect(self.previous_round)
+        self.previous_button.setFont(QFont("Times", weight=QFont.Bold))
 
         # add a next round button to go to next round
         self.next_button = QPushButton('Next Round', self)
-        self.next_button.move(tickx + buffer + 2 * button_width, name_y + 3 * (name_in_height + buffer))
+        self.next_button.move(name_in_x + 3 * (button_width), name_y + buffer + 4 * (name_in_height + buffer))
         self.next_button.resize(2 * button_width, name_in_height)
-        self.next_button.setStyleSheet("background-color: skyblue")
+        self.next_button.setStyleSheet("background-color: lightblue")
         self.next_button.clicked.connect(self.next_round)
+        self.next_button.setFont(QFont("Times", weight=QFont.Bold))
 
-        self.confirm_list = [self.name_button, self.wind_button, self.mj_button, self.scores_button, self.round_button]
-        for btn in self.confirm_list:
-            btn.setStyleSheet("background-color: silver")
-
-        self.round_button.setStyleSheet("background-color: yellowgreen")
-
+        # add a scoring button to calculate and show scores
+        self.score_button = QPushButton('Show\nScores', self)
+        self.score_button.move(tickx + 2 * buffer + 2 * button_width, name_y + 2 * (name_in_height + buffer))
+        self.score_button.resize(button_width, 2 * name_in_height)
+        self.score_button.setStyleSheet("background-color: mediumorchid")
+        self.score_button.clicked.connect(self.next_round)
+        self.score_button.setFont(QFont("Times", weight=QFont.Bold))
+        
     def set_tick_style(self, checkbox):
         """
         Change styling of tick boxes
@@ -326,9 +308,8 @@ class MainWindow(QMainWindow):
             print(f'{players[i].name}')
 
         # initialise scoreboards
-        score_inputs.columns=[players[i].name for i in range(4)]
-        round_scores.columns=[players[i].name for i in range(4)]
-        total_scores.columns=[players[i].name for i in range(4)]
+        for df in df_list:
+            df.columns = [players[i].name for i in range(4)]
 
         return p1, p2, p3, p4
 
@@ -340,6 +321,9 @@ class MainWindow(QMainWindow):
             players[i].wind[self.round_num - 1] = self.wind_list[i].currentText()
             print(f'{players[i].name}: {players[i].wind[self.round_num - 1]}')
 
+        for player in players:
+            wind_inputs.loc[f'Round {self.round_num}', f'{player.name}'] = player.wind[self.round_num - 1]
+
         return p1, p2, p3, p4
 
     def update_mahjong(self):
@@ -349,6 +333,9 @@ class MainWindow(QMainWindow):
         for i in range(4):
             players[i].mahjong[self.round_num - 1] = self.mj_list[i].isChecked()
             print(f'{players[i].name}: {players[i].mahjong[self.round_num - 1]}')
+
+        for player in players:
+            mj_inputs.loc[f'Round {self.round_num}', f'{player.name}'] = player.mahjong[self.round_num - 1]
 
         return p1, p2, p3, p4
 
@@ -366,6 +353,70 @@ class MainWindow(QMainWindow):
 
         return p1, p2, p3, p4
 
+    def update_round_scores(self):
+        """
+        Calculate round scores from score inputs
+        """
+
+        # go back through all rounds and calculate round scores
+        self.rounds = [f'Round {rnd + 1}' for rnd in range(len(score_inputs))]
+
+        # for all rounds
+        for round in self.rounds:
+            self.losers = []
+
+            # for each player
+            for player in players:
+                if mj_inputs.loc[round, player.name]:
+                    # define mahjong score and winner
+                    self.mahjong_score = score_inputs.loc[round, player.name]
+                    self.winner = player
+                else:
+                    self.losers.append(player)
+
+            # if East wins
+            if wind_inputs.loc[round, f'{self.winner.name}'] == 'East':
+                self.east_win = True
+                round_scores.loc[round, f'{self.winner.name}'] = 6 * self.mahjong_score
+            # if East hasn't won
+            else:
+                self.east_win = False
+                round_scores.loc[round, f'{self.winner.name}'] = 3 * self.mahjong_score
+
+            # for losing players
+            for player in self.losers:
+                round_scores.loc[round, player.name] = 0
+                # subtract mahjong score, doubled if East or mahjong was East
+                if self.east_win or wind_inputs.loc[round, player.name] == 'East':
+                    round_scores.loc[round, player.name] -= 2 * self.mahjong_score
+                else:
+                    round_scores.loc[round, player.name] -= self.mahjong_score
+
+                for other in self.losers:
+                    # don't want player compared to themselves
+                    if other != player:
+                        if wind_inputs.loc[round, player.name] == 'East' or wind_inputs.loc[round, other.name] == 'East':
+                            self.diff = 2 * (score_inputs.loc[round, player.name] - score_inputs.loc[round, other.name])
+                            round_scores.loc[round, player.name] += self.diff
+                        else:
+                            self.diff = score_inputs.loc[round, player.name] - score_inputs.loc[round, other.name]
+                            round_scores.loc[round, player.name] += self.diff
+
+    def update_total_scores(self):
+        """
+        Calculate total scores from round scores
+        """
+        self.rounds = [f'Round {rnd + 1}' for rnd in range(len(score_inputs))]
+
+        # for all rounds
+        for round in self.rounds:
+            for player in players:
+                if round == 'Round 1':
+                    total_scores.loc[round, player.name] = round_scores.loc[round, player.name]
+                else:
+                    self.prev_round = self.rounds[self.rounds.index(round) - 1]
+                    total_scores.loc[round, player.name] = total_scores.loc[self.prev_round, player.name] + round_scores.loc[round, player.name]
+
     def update_all(self):
         """
         Update names, winds, mahjong and scores
@@ -374,6 +425,8 @@ class MainWindow(QMainWindow):
         self.update_winds()
         self.update_mahjong()
         self.update_scores()
+        self.update_round_scores()
+        self.update_total_scores()
 
         for i in range(4):
             self.round_idx = self.round_num - 1
@@ -383,6 +436,8 @@ class MainWindow(QMainWindow):
             self.high_round = self.round_num
 
         print(score_inputs)
+        print(round_scores)
+        print(total_scores)
 
     def next_round(self):
         """
@@ -416,7 +471,7 @@ class MainWindow(QMainWindow):
             # add an empty item to score list for each player
             for player in players:
                 player.wind.append('Unknown')
-                player.mahjong.append('Unknown')
+                player.mahjong.append(False)
                 player.score.append(0)
 
             # reset scores to 0 for next round
@@ -477,13 +532,12 @@ winds = ['East', 'South', 'West', 'North']
 score_inputs = pd.DataFrame(columns=['p1', 'p2', 'p3', 'p4'])
 round_scores = pd.DataFrame(columns=['p1', 'p2', 'p3', 'p4'])
 total_scores = pd.DataFrame(columns=['p1', 'p2', 'p3', 'p4'])
+wind_inputs = pd.DataFrame(columns=['p1', 'p2', 'p3', 'p4'])
+mj_inputs = pd.DataFrame(columns=['p1', 'p2', 'p3', 'p4'])
+df_list = [score_inputs, round_scores, total_scores, wind_inputs, mj_inputs]
 
 if __name__ == "__main__":
     app = QApplication([])
     mainWin = MainWindow()
     mainWin.show()
     app.exec()
-
-    # for i in range(4):
-    #     print(f'p{i}: {players[i].name}, {players[i].wind}, {players[i].mahjong}, {players[i].score}')
-

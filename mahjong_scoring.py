@@ -152,7 +152,7 @@ def end_round(round_num, players, round_scores, total_scores):
             round_scores.loc[this_round, player.name] += 6 * mahjong_score
         else:
             east_win = False
-            round_scores.loc[this_round, player.name] += 4 * mahjong_score
+            round_scores.loc[this_round, player.name] += 3 * mahjong_score
 
     # for losing players
     for player in losers:
