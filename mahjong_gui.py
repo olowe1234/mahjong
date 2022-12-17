@@ -93,9 +93,9 @@ class MainWindow(QMainWindow):
 
         # add confirm button to names
         button_width = 75
-        self.name_button = QPushButton('Confirm', self)
+        self.name_button = QPushButton('Confirm Names', self)
         self.name_button.move(name_in_x, name_in_y + 4 * (name_in_height + buffer))
-        self.name_button.resize(button_width, name_in_height)
+        self.name_button.resize(2 * button_width, name_in_height)
         self.name_button.clicked.connect(self.update_names)
 
         # set round input distances
@@ -185,8 +185,15 @@ class MainWindow(QMainWindow):
 
         self.mj_list = [self.mj_tick1, self.mj_tick2, self.mj_tick3, self.mj_tick4]
 
-        ### ADD FUNCTION USING LAMBDAS TO STOP MORE THAN ONE MAHJONG BOX BEING TICKED ###
-
+        # automatically unchecks other mahjong boxes when one is clicked
+        mahjong1 = lambda: self.auto_mahjong(1)
+        mahjong2 = lambda: self.auto_mahjong(2)
+        mahjong3 = lambda: self.auto_mahjong(3)
+        mahjong4 = lambda: self.auto_mahjong(4)
+        self.mj_tick1.clicked.connect(mahjong1)
+        self.mj_tick2.clicked.connect(mahjong2)
+        self.mj_tick3.clicked.connect(mahjong3)
+        self.mj_tick4.clicked.connect(mahjong4)
 
     def set_tick_style(self, checkbox):
         """
@@ -199,6 +206,18 @@ class MainWindow(QMainWindow):
                                "}")
         return checkbox
 
+    def auto_mahjong(self, mj_num):
+        """
+        Uncheck other mahjong boxes when one is checked
+        """
+        # uncheck all
+        for mj_tick in self.mj_list:
+            mj_tick.setChecked(False)
+
+        # check appropriate one
+        self.mj_list[mj_num - 1].setChecked(True)
+
+        return self.mj_tick1, self.mj_tick2, self.mj_tick3, self.mj_tick4
 
     def auto_wind(self, wind_num):
         """
