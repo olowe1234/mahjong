@@ -108,7 +108,7 @@ class MainWindow(QMainWindow):
         self.roundTitle.setText('Round 1')
         self.roundTitle.move(round_x, round_y)
         self.roundTitle.resize(name_in_width, name_in_height)
-        self.roundTitle.setFont(QFont("Times", weight=QFont.Bold))
+        self.roundTitle.setFont(QFont("Times", 10, weight=QFont.Bold))
 
         # wind and mahjong titles
         self.windTitle = QLabel(self)
@@ -262,7 +262,7 @@ class MainWindow(QMainWindow):
         self.score_button.move(tickx + 2 * buffer + 2 * button_width, name_y + 2 * (name_in_height + buffer))
         self.score_button.resize(button_width, 2 * name_in_height)
         self.score_button.setStyleSheet("background-color: mediumorchid")
-        self.score_button.clicked.connect(self.next_round)
+        self.score_button.clicked.connect(self.plotting)
         self.score_button.setFont(QFont("Times", weight=QFont.Bold))
         
     def set_tick_style(self, checkbox):
@@ -509,6 +509,93 @@ class MainWindow(QMainWindow):
             else:
                 self.mj_list[i].setChecked(False)
             self.scores_list[i].setText(f'{players[i].score[self.round_num - 1]}')
+
+    def plotting(self):
+        """
+        Plots tables of scores
+        """
+
+        plt.close('all')
+
+        # turn dataframes into table formats
+        input_text = []
+        round_text = []
+        total_text = []
+
+        for row in range(len(score_inputs)):
+            input_text.append(score_inputs.iloc[row])
+            round_text.append(round_scores.iloc[row])
+            total_text.append(total_scores.iloc[row])
+
+        fig = plt.figure(figsize=(12, 5), facecolor='whitesmoke')
+        ax1 = fig.add_subplot(311)
+        ax2 = fig.add_subplot(312)
+        ax3 = fig.add_subplot(313)
+
+        ax1.axis('off')
+        ax2.axis('off')
+        ax3.axis('off')
+
+        ax1.set_title('Inputted Scores \n', fontweight='bold')
+        ax2.set_title('Round Scores \n', fontweight='bold')
+        ax3.set_title('Total Scores \n', fontweight='bold')
+
+        # input scores
+        input_table = ax1.table(
+            cellText=input_text,
+            colLabels=score_inputs.columns,
+            rowLabels=score_inputs.index,
+            cellLoc='center',
+            loc='center',
+            colColours=['deepskyblue'] * 4,
+            rowColours=['deepskyblue'] * 10,
+            cellColours=[['lightblue'] * 4] * self.round_num
+        )
+
+        for (row, col), cell in input_table.get_celld().items():
+            if row == 0 or col == -1:
+                cell.set_text_props(fontproperties=FontProperties(weight='bold'))
+
+        input_table.set_fontsize(12)
+
+        # round scores
+        round_table = ax2.table(
+            cellText=round_text,
+            colLabels=round_scores.columns,
+            rowLabels=round_scores.index,
+            cellLoc='center',
+            loc='center',
+            colColours=['orange'] * 4,
+            rowColours=['orange'] * 10,
+            cellColours=[['moccasin'] * 4] * self.round_num
+        )
+
+        for (row, col), cell in round_table.get_celld().items():
+            if row == 0 or col == -1:
+                cell.set_text_props(fontproperties=FontProperties(weight='bold'))
+
+        round_table.set_fontsize(12)
+
+        # total scores
+        total_table = ax3.table(
+            cellText=total_text,
+            colLabels=total_scores.columns,
+            rowLabels=total_scores.index,
+            cellLoc='center',
+            loc='center',
+            colColours=['green'] * 4,
+            rowColours=['green'] * 10,
+            cellColours=[['palegreen'] * 4] * self.round_num
+        )
+
+        for (row, col), cell in total_table.get_celld().items():
+            if row == 0 or col == -1:
+                cell.set_text_props(fontproperties=FontProperties(weight='bold'))
+
+        total_table.set_fontsize(12)
+
+        fig.tight_layout(pad=1)
+
 
 class player():
     def __init__(self):
