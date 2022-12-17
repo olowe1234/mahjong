@@ -24,9 +24,8 @@ class MainWindow(QMainWindow):
 
         # set name and size of window
         self.setWindowTitle("Mahjong Scorer")
-        self.setMinimumSize(QSize(1500, 700))
+        self.setMinimumSize(QSize(700, 450))
 
-        ### PLAYER NAME INPUTS ###
         # define a buffer
         buffer = 10
 
@@ -60,6 +59,10 @@ class MainWindow(QMainWindow):
         self.name2Label.setText('Player 2:')
         self.name3Label.setText('Player 3:')
         self.name4Label.setText('Player 4:')
+        self.name_label_list = [self.name1Label, self.name2Label, self.name3Label, self.name4Label]
+        for i in range(4):
+            self.name_label_list[i].setFont(QFont("Times", weight=QFont.Bold))
+
 
         # move name labels into position
         self.name1Label.move(name_x, name_y)
@@ -91,6 +94,8 @@ class MainWindow(QMainWindow):
         self.name3Input.resize(name_in_width, name_in_height)
         self.name4Input.resize(name_in_width, name_in_height)
 
+        self.name_list = [self.name1Input, self.name2Input, self.name3Input, self.name4Input]
+
         # add confirm button to names
         button_width = 75
         self.name_button = QPushButton('Confirm Names', self)
@@ -112,13 +117,13 @@ class MainWindow(QMainWindow):
         # wind and mahjong titles
         self.windTitle = QLabel(self)
         self.windTitle.setText('Wind')
-        self.windTitle.move(round_x, name_y - 4 * buffer)
+        self.windTitle.move(round_x + buffer, name_y - 4 * buffer)
         self.windTitle.resize(name_in_width, name_in_height)
         self.windTitle.setFont(QFont("Times", weight=QFont.Bold))
 
         self.mjTitle = QLabel(self)
         self.mjTitle.setText('Mahjong')
-        self.mjTitle.move(round_x + 8 * buffer, name_y - 4 * buffer)
+        self.mjTitle.move(round_x + 9 * buffer, name_y - 4 * buffer)
         self.mjTitle.resize(name_in_width, name_in_height)
         self.mjTitle.setFont(QFont("Times", weight=QFont.Bold))
 
@@ -157,14 +162,16 @@ class MainWindow(QMainWindow):
         self.wind3List.activated.connect(wind3_slot)
         self.wind4List.activated.connect(wind4_slot)
 
+        self.wind_list = [self.wind1List, self.wind2List, self.wind3List, self.wind4List]
+
         # add confirm button to winds
-        self.wind_button = QPushButton('Confirm', self)
+        self.wind_button = QPushButton('Confirm\nWinds', self)
         self.wind_button.move(round_x, name_y + 4 * (name_in_height + buffer))
-        self.wind_button.resize(button_width, name_in_height)
+        self.wind_button.resize(button_width, 2 * name_in_height)
         self.wind_button.clicked.connect(self.update_winds)
 
         # add mahjong check boxes
-        tickx = round_x + 10 * buffer
+        tickx = round_x + 11 * buffer
         ticky = name_y + 5
 
         self.mj_tick1 = QCheckBox(self)
@@ -195,6 +202,64 @@ class MainWindow(QMainWindow):
         self.mj_tick3.clicked.connect(mahjong3)
         self.mj_tick4.clicked.connect(mahjong4)
 
+        # add confirm button to mahjong
+        self.mj_button = QPushButton('Confirm\nMahjong', self)
+        self.mj_button.move(tickx - 2 * buffer, name_y + 4 * (name_in_height + buffer))
+        self.mj_button.resize(button_width, 2 * name_in_height)
+        self.mj_button.clicked.connect(self.update_mahjong)
+
+        # score box positions
+        score_x = tickx + name_width
+
+        # add scores label
+        self.scoresTitle = QLabel(self)
+        self.scoresTitle.setText('Score')
+        self.scoresTitle.move(score_x + buffer, name_y - 4 * buffer)
+        self.scoresTitle.resize(name_width, name_height)
+        self.scoresTitle.setFont(QFont("Times", weight=QFont.Bold))
+
+        # allow only integers
+        self.int_val = QIntValidator()
+
+        # add score inputs
+        self.score1 = QLineEdit(self)
+        self.score1.setValidator(self.int_val)
+        self.score1.setText('0')
+        self.score1.move(score_x, name_y)
+        self.score1.resize(name_width, name_height)
+
+        self.score2 = QLineEdit(self)
+        self.score2.setValidator(self.int_val)
+        self.score2.setText('0')
+        self.score2.move(score_x, name_y + (name_in_height + buffer))
+        self.score2.resize(name_width, name_height)
+
+        self.score3 = QLineEdit(self)
+        self.score3.setValidator(self.int_val)
+        self.score3.setText('0')
+        self.score3.move(score_x, name_y + 2 * (name_in_height + buffer))
+        self.score3.resize(name_width, name_height)
+
+        self.score4 = QLineEdit(self)
+        self.score4.setValidator(self.int_val)
+        self.score4.setText('0')
+        self.score4.move(score_x, name_y + 3 * (name_in_height + buffer))
+        self.score4.resize(name_width, name_height)
+
+        self.scores_list = [self.score1, self.score2, self.score3, self.score4]
+
+        # add confirm button to scores
+        self.scores_button = QPushButton('Confirm\nScores', self)
+        self.scores_button.move(score_x, name_y + 4 * (name_in_height + buffer))
+        self.scores_button.resize(button_width, 2 * name_in_height)
+        self.scores_button.clicked.connect(self.update_scores)
+        
+        # add a confirm button for all things this round
+        self.round_button = QPushButton('Confirm\nRound', self)
+        self.round_button.move(tickx + buffer + 2 * button_width, name_y + (name_in_height + 2 * buffer))
+        self.round_button.resize(button_width, 2 * name_in_height)
+        self.round_button.clicked.connect(self.update_all)
+
     def set_tick_style(self, checkbox):
         """
         Change styling of tick boxes
@@ -223,7 +288,6 @@ class MainWindow(QMainWindow):
         """
         Take wind that has been changed by user and change the other winds accordingly.
         """
-        self.wind_list = [self.wind1List, self.wind2List, self.wind3List, self.wind4List]
         idx = self.wind_list[wind_num - 1].currentIndex()
         self.wind_list[wind_num - 2].setCurrentText(winds[idx - 1])
         self.wind_list[wind_num - 3].setCurrentText(winds[idx - 2])
@@ -234,21 +298,53 @@ class MainWindow(QMainWindow):
         """
         Update names of players when inputs are confirmed
         """
-        p1.name = self.name1Input.text()
-        p2.name = self.name2Input.text()
-        p3.name = self.name3Input.text()
-        p4.name = self.name4Input.text()
+        for i in range(4):
+            players[i].name = self.name_list[i].text()
+            print(f'{players[i].name}')
+
         return p1, p2, p3, p4
 
     def update_winds(self):
         """
         Update winds of players when changed
         """
-        p1.wind = self.wind1List.currentText()
-        p2.wind = self.wind2List.currentText()
-        p3.wind = self.wind3List.currentText()
-        p4.wind = self.wind4List.currentText()
+        for i in range(4):
+            players[i].wind = self.wind_list[i].currentText()
+            print(f'{players[i].name}: {players[i].wind}')
+
         return p1, p2, p3, p4
+
+    def update_mahjong(self):
+        """
+        Update mahjong player when changed
+        """
+        for i in range(4):
+            players[i].mahjong = self.mj_list[i].isChecked()
+            print(f'{players[i].name}: {players[i].mahjong}')
+
+        return p1, p2, p3, p4
+
+    def update_scores(self):
+        """
+        Update player scores
+        """
+        for i in range(4):
+            players[i].score = int(self.scores_list[i].text())
+            print(f'{players[i].name}: {players[i].score}')
+
+        return p1, p2, p3, p4
+
+    def update_all(self):
+        """
+        Update names, winds, mahjong and scores
+        """
+        self.update_names()
+        self.update_winds()
+        self.update_mahjong()
+        self.update_scores()
+
+        for i in range(4):
+            print(f'{players[i].name}: {players[i].wind}, {players[i].mahjong}, {players[i].score}')
 
 
 class player():
@@ -257,7 +353,6 @@ class player():
         self.wind = 'East'
         self.mahjong = False
         self.score = 0
-
 
 # initialise player classes
 p1 = player()
@@ -275,4 +370,7 @@ if __name__ == "__main__":
     mainWin = MainWindow()
     mainWin.show()
     app.exec()
+
+    for i in range(4):
+        print(f'p{i}: {players[i].name}, {players[i].wind}, {players[i].mahjong}, {players[i].score}')
 
