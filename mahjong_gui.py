@@ -264,7 +264,17 @@ class MainWindow(QMainWindow):
         self.score_button.setStyleSheet("background-color: mediumorchid")
         self.score_button.clicked.connect(self.plotting)
         self.score_button.setFont(QFont("Times", weight=QFont.Bold))
-        
+
+        # create green tick to represent a round being confirmed
+        self.green_tick = QLabel(self)
+        self.green_tick_pic = QPixmap('green_tick_final.jpg')
+        self.green_tick.setPixmap(self.green_tick_pic)
+        self.green_tick.setAlignment(Qt.AlignCenter)
+        self.green_tick.move(tickx, round_y + buffer)
+        self.green_tick.resize(40, 20)
+        self.green_tick.setScaledContents(True)
+        self.green_tick.setHidden(True)
+
     def set_tick_style(self, checkbox):
         """
         Change styling of tick boxes
@@ -421,31 +431,54 @@ class MainWindow(QMainWindow):
         """
         Update names, winds, mahjong and scores
         """
-        self.update_names()
-        self.update_winds()
-        self.update_mahjong()
-        self.update_scores()
-        self.update_round_scores()
-        self.update_total_scores()
+        self.mj_tick_list = [self.mj_tick1.isChecked(), self.mj_tick2.isChecked(), self.mj_tick3.isChecked(), self.mj_tick4.isChecked()]
+        self.score_input_list = [int(self.score1.text()), int(self.score2.text()), int(self.score3.text()), int(self.score4.text())]
 
-        for i in range(4):
-            self.round_idx = self.round_num - 1
-            print(f'{players[i].name}: {players[i].wind[self.round_idx]}, {players[i].mahjong[self.round_idx]}, {players[i].score[self.round_idx]}')
+        if sum(self.mj_tick_list) > 0 and sum(self.score_input_list) > 0:
 
-        if self.round_num > self.high_round:
-            self.high_round = self.round_num
+            self.update_names()
+            self.update_winds()
+            self.update_mahjong()
+            self.update_scores()
+            self.update_round_scores()
+            self.update_total_scores()
 
-        print(score_inputs)
-        print(round_scores)
-        print(total_scores)
+            for i in range(4):
+                self.round_idx = self.round_num - 1
+                print(f'{players[i].name}: {players[i].wind[self.round_idx]}, {players[i].mahjong[self.round_idx]}, {players[i].score[self.round_idx]}')
+
+            if self.round_num > self.high_round:
+                self.high_round = self.round_num
+                self.green_tick.setHidden(False)
+
+            print(score_inputs)
+            print(round_scores)
+            print(total_scores)
+
+        else:
+            self.msg = QMessageBox()
+            self.msg.setIcon(QMessageBox.Critical)
+            if sum(self.mj_tick_list) == 0 and sum(self.score_input_list) == 0:
+                self.msg.setText("No Mahjong player ticked\nNo scores")
+            elif sum(self.mj_tick_list) == 0:
+                self.msg.setText("No Mahjong player ticked")
+            elif sum(self.score_input_list) == 0:
+                self.msg.setText("No scores")
+            self.msg.setWindowTitle("Can't Confirm Round")
+            self.msg.exec_()
 
     def next_round(self):
         """
         Move onto next round
         """
-
         # increase round number
         self.round_num += 1
+
+        # green tick if already confirmed round
+        if len(total_scores) >= self.round_num:
+            self.green_tick.setHidden(False)
+        else:
+            self.green_tick.setHidden(True)
 
         # change round label
         self.roundTitle.setText(f'Round {self.round_num}')
@@ -498,6 +531,12 @@ class MainWindow(QMainWindow):
         if self.round_num != 1:
             self.round_num -= 1
 
+        # green tick if already confirmed round
+        if len(total_scores) >= self.round_num:
+            self.green_tick.setHidden(False)
+        else:
+            self.green_tick.setHidden(True)
+
         # change round label
         self.roundTitle.setText(f'Round {self.round_num}')
 
@@ -527,7 +566,7 @@ class MainWindow(QMainWindow):
             round_text.append(round_scores.iloc[row])
             total_text.append(total_scores.iloc[row])
 
-        fig = plt.figure(figsize=(12, 5), facecolor='whitesmoke')
+        fig = plt.figure(figsize=(10, 9), facecolor='whitesmoke')
         ax1 = fig.add_subplot(311)
         ax2 = fig.add_subplot(312)
         ax3 = fig.add_subplot(313)
@@ -549,7 +588,7 @@ class MainWindow(QMainWindow):
             loc='center',
             colColours=['deepskyblue'] * 4,
             rowColours=['deepskyblue'] * 10,
-            cellColours=[['lightblue'] * 4] * self.round_num
+            cellColours=[['lightblue'] * 4] * self.high_round
         )
 
         for (row, col), cell in input_table.get_celld().items():
@@ -567,7 +606,7 @@ class MainWindow(QMainWindow):
             loc='center',
             colColours=['orange'] * 4,
             rowColours=['orange'] * 10,
-            cellColours=[['moccasin'] * 4] * self.round_num
+            cellColours=[['moccasin'] * 4] * self.high_round
         )
 
         for (row, col), cell in round_table.get_celld().items():
@@ -585,7 +624,7 @@ class MainWindow(QMainWindow):
             loc='center',
             colColours=['green'] * 4,
             rowColours=['green'] * 10,
-            cellColours=[['palegreen'] * 4] * self.round_num
+            cellColours=[['palegreen'] * 4] * self.high_round
         )
 
         for (row, col), cell in total_table.get_celld().items():
@@ -595,7 +634,6 @@ class MainWindow(QMainWindow):
         total_table.set_fontsize(12)
 
         fig.tight_layout(pad=1)
-
 
 class player():
     def __init__(self):
