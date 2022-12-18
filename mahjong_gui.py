@@ -385,13 +385,13 @@ class MainWindow(QMainWindow):
                     self.losers.append(player)
 
             # if East wins
-            if wind_inputs.loc[round, f'{self.winner.name}'] == 'East':
+            if wind_inputs.loc[round, self.winner.name] == 'East':
                 self.east_win = True
-                round_scores.loc[round, f'{self.winner.name}'] = 6 * self.mahjong_score
+                round_scores.loc[round, self.winner.name] = 6 * self.mahjong_score
             # if East hasn't won
             else:
                 self.east_win = False
-                round_scores.loc[round, f'{self.winner.name}'] = 3 * self.mahjong_score
+                round_scores.loc[round, self.winner.name] = 4 * self.mahjong_score
 
             # for losing players
             for player in self.losers:
@@ -634,6 +634,8 @@ class MainWindow(QMainWindow):
         total_table.set_fontsize(12)
 
         fig.tight_layout(pad=1)
+
+        fig.show()
 
 class player():
     def __init__(self):
